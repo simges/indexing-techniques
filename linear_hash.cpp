@@ -37,24 +37,24 @@
 struct OverflowBitmap {
     std::vector<uint64_t> bitmap;
     uint64_t num_bits;
-
+    
     explicit OverflowBitmap(uint64_t size) : num_bits(size) {
         auto num_of_blocks = num_bits + 63 / 64; // round up
         bitmap.resize(num_of_blocks);
     }
-
+    
     void set(uint64_t idx) {
         auto block = idx / bitmap.size();
         auto offset = idx % bitmap.size();
         bitmap[block] |= 1 << offset;
     }
-
+    
     void clear(uint64_t idx) {
         auto block = idx / bitmap.size();
         auto offset = idx % bitmap.size();
         bitmap[block] &= ~(1 << offset);
     }
-
+    
     bool is_overflow() {
         auto it = std::find_if(bitmap.begin(), bitmap.end(), 
                                [](uint64_t& val) { return val != 0; });
@@ -148,7 +148,7 @@ public:
 
             _update_split_ptr();
         }
-}
+    }
 };
 
 int main() {
