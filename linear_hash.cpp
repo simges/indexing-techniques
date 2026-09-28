@@ -37,24 +37,24 @@
 struct OverflowBitmap {
     std::vector<uint64_t> bitmap;
     uint64_t num_bits;
-    
+
     explicit OverflowBitmap(uint64_t size) : num_bits(size) {
         auto num_of_blocks = num_bits + 63 / 64; // round up
         bitmap.resize(num_of_blocks);
     }
-    
+
     void set(uint64_t idx) {
         auto block = idx / bitmap.size();
         auto offset = idx % bitmap.size();
         bitmap[block] |= 1 << offset;
     }
-    
+
     void clear(uint64_t idx) {
         auto block = idx / bitmap.size();
         auto offset = idx % bitmap.size();
         bitmap[block] &= ~(1 << offset);
     }
-    
+
     bool is_overflow() {
         auto it = std::find_if(bitmap.begin(), bitmap.end(), 
                                [](uint64_t& val) { return val != 0; });
@@ -73,14 +73,16 @@ private:
     int _split_ptr{0};                              // pointer to the next bucket to split
 
     OverflowBitmap _overflow_bitmap;
-    int _round {0};
 
     LinearHash() = delete;
 
-    size_t _hash(const uint64_t key, size_t round = 0) const {
+    size_t _hash(const uint64_t key, bool again = false) const {
         // return a hash value for the given key,
         // hash function is modulo the size of the hash table
-        return key % (_table_size * (1ULL << round));
+        if (again) {
+            return key % (_table_size * 2);
+        }
+        return key % _table_size;
     }
 
     void _redistribute_bucket(uint64_t idx) {
@@ -89,7 +91,7 @@ private:
 
         size_t new_idx = -1;
         for (auto const& key : keys_to_rehash) {
-            new_idx = _hash(key, _round + 1);
+            new_idx = _hash(key, true);
 
             std::cout << "By redistribution, key " << key << " goes into " << new_idx << std::endl;
             _hash_table[new_idx].push_back(key);
@@ -109,7 +111,7 @@ private:
         }
         std::cout << "New hash table size: " << _hash_table.size()
                   << "\nsplit ptr points to the bucket: " << _split_ptr
-                  << "\nfixed table size: " << _table_size << std::endl;
+                  << "\ntable size: " << _table_size << std::endl;
     }
 
 public: 
@@ -129,7 +131,7 @@ public:
         size_t idx = _hash(key);
         if (_split_ptr > idx) {
             // check if the key goes into the new bucket or old bucket
-            idx = _hash(key, _round + 1);
+            idx = _hash(key, true);
         }
         _hash_table[idx].push_back(key);
         std::cout <<"Key " << key << " goes into bucket " << idx << std::endl;
@@ -148,7 +150,7 @@ public:
 
             _update_split_ptr();
         }
-    }
+}
 };
 
 int main() {
