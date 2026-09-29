@@ -1,23 +1,4 @@
-🏛️ System Architecture & Data Structures
 
-                 LinearHash
-         ┌────────────────────────┐
-         │ _table_size: 2         │
-         │ _bucket_size: 2        │
-         │ _round: 0              │
-         │ _split_ptr ─────────┐  │
-         └─────────────────────┼──┘
-                               │
-            Hash Table Index   │   Buckets (std::list)
-           ┌────────────────┐  │  ┌─────────────────┐
-  idx 0    │   Bucket 0     │◄─┴──┤ [ Key 4, Key 8 ]│
-           ├────────────────┤     ├─────────────────┤
-  idx 1    │   Bucket 1     │     │ [ Key 1, Key 9 ]│
-           ├────────────────┤     ├─────────────────┤
-  idx 2    │   Bucket 2     │     │ [ Key 2, Key 10]│
-           └────────────────┘     └─────────────────┘
-                   │                       │
-                   ▼                       ▼
-            Overflow Bitmap      Tracks overflow state
-          ┌────────────────┐     via 64-bit block masks
-          │ [ 0 | 0 | 1 ]  │
+Linear Hash Implementation (Prortype only, should be reviewed & run against corner cases)
+
+<img width="774" height="424" alt="image" src="https://github.com/user-attachments/assets/1a7437ff-f8d5-4766-aa0b-9e0ee25aba78" />
